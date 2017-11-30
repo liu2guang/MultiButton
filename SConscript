@@ -1,0 +1,19 @@
+from building import * 
+
+# get current dir path
+cwd = GetCurrentDir()
+
+# init src and inc vars
+src = []
+inc = []
+
+# add MultiButton common include
+inc = inc + [cwd]
+
+# add MultiButton basic code
+src = src + ['./multi_button.c']
+
+# add group to IDE project
+group = DefineGroup('MultiButton', src, depend = ['PKG_USING_MULTIBUTTON'], CPPPATH = inc)
+
+Return('group')
