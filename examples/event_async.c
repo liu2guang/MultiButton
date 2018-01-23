@@ -1,58 +1,88 @@
+#include <rtthread.h> 
+#include <rtdevice.h> 
 #include "multi_button.h"
 
-struct Button btn1;
-struct Button btn2;
+static struct button btn;
 
-int read_button1_GPIO()
+#define BUTTON_PIN (10)
+
+static uint8_t button_read_pin(void) 
 {
-    return HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+    return rt_pin_read(BUTTON_PIN); 
 }
 
-int read_button2_GPIO()
+void button_callback(void *btn)
 {
-    return HAL_GPIO_ReadPin(B2_GPIO_Port, B2_Pin);
+    uint32_t btn_event_val; 
+    
+    btn_event_val = get_button_event((struct button *)btn); 
+    
+    switch(btn_event_val)
+    {
+    case PRESS_DOWN:
+        rt_kprintf("button press down\n"); 
+    break; 
+
+    case PRESS_UP: 
+        rt_kprintf("button press up\n");
+    break; 
+
+    case PRESS_REPEAT: 
+        rt_kprintf("button press repeat\n");
+    break; 
+
+    case SINGLE_CLICK: 
+        rt_kprintf("button single click\n");
+    break; 
+
+    case DOUBLE_CLICK: 
+        rt_kprintf("button double click\n");
+    break; 
+
+    case LONG_RRESS_START: 
+        rt_kprintf("button long press start\n");
+    break; 
+
+    case LONG_PRESS_HOLD: 
+        rt_kprintf("button long press hold\n");
+    break; 
+    }
 }
 
-int main()
+void btn_thread_entry(void* p)
 {
-    button_init(&btn1, read_button1_GPIO, 0);
-    button_init(&btn2, read_button2_GPIO, 0);
-
-    button_attach(&btn1, PRESS_DOWN,       BTN1_PRESS_DOWN_Handler);
-    button_attach(&btn1, PRESS_UP,         BTN1_PRESS_UP_Handler);
-    button_attach(&btn1, PRESS_REPEAT,     BTN1_PRESS_REPEAT_Handler);
-    button_attach(&btn1, SINGLE_CLICK,     BTN1_SINGLE_Click_Handler);
-    button_attach(&btn1, DOUBLE_CLICK,     BTN1_DOUBLE_Click_Handler);
-    button_attach(&btn1, LONG_RRESS_START, BTN1_LONG_RRESS_START_Handler);
-    button_attach(&btn2, LONG_PRESS_HOLD,  BTN1_LONG_PRESS_HOLD_Handler);
-
-    button_attach(&btn2, PRESS_DOWN,       BTN2_PRESS_DOWN_Handler);
-    button_attach(&btn2, PRESS_UP,         BTN2_PRESS_UP_Handler);
-    button_attach(&btn2, PRESS_REPEAT,     BTN2_PRESS_REPEAT_Handler);
-    button_attach(&btn2, SINGLE_CLICK,     BTN2_SINGLE_Click_Handler);
-    button_attach(&btn2, DOUBLE_CLICK,     BTN2_DOUBLE_Click_Handler);
-    button_attach(&btn2, LONG_RRESS_START, BTN2_LONG_RRESS_START_Handler);
-    button_attach(&btn2, LONG_PRESS_HOLD,  BTN2_LONG_PRESS_HOLD_Handler);
-
-    button_start(&btn1);
-    button_start(&btn2);
-
-    //make the timer invoking the button_ticks() interval 5ms.
-    //This function is implemented by yourself.
-    __timer_start(button_ticks, 0, 5);
-
     while(1)
-    {}
+    {
+        /* 5ms */
+        rt_thread_delay(RT_TICK_PER_SECOND/200); 
+        button_ticks(); 
+    }
 }
 
-void BTN1_PRESS_DOWN_Handler(void* btn)
+int multi_button_test(void)
 {
-    //do something...
-}
+    rt_thread_t thread = RT_NULL;
+    
+    /* Create background ticks thread */
+    thread = rt_thread_create("btn", btn_thread_entry, RT_NULL, 1024, 10, 10);
+    if(thread == RT_NULL)
+    {
+        return RT_ERROR; 
+    }
+    rt_thread_startup(thread);
 
-void BTN1_PRESS_UP_Handler(void* btn)
-{
-    //do something...
-}
+    /* low level drive */
+    rt_pin_mode  (BUTTON_PIN, PIN_MODE_INPUT); 
+    button_init  (&btn, button_read_pin, PIN_LOW);
+    button_attach(&btn, PRESS_DOWN,       button_callback);
+    button_attach(&btn, PRESS_UP,         button_callback);
+    button_attach(&btn, PRESS_REPEAT,     button_callback);
+    button_attach(&btn, SINGLE_CLICK,     button_callback);
+    button_attach(&btn, DOUBLE_CLICK,     button_callback);
+    button_attach(&btn, LONG_RRESS_START, button_callback);
+    button_attach(&btn, LONG_PRESS_HOLD,  button_callback);
+    button_start (&btn);
 
-...
+    return RT_EOK; 
+}
+INIT_APP_EXPORT(multi_button_test); 

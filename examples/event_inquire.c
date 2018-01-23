@@ -1,37 +1,79 @@
+#include <rtthread.h> 
+#include <rtdevice.h> 
 #include "multi_button.h"
 
-struct Button btn1;
+static struct button btn;
 
-int read_button1_GPIO()
+#define BUTTON_PIN (10)
+
+static uint8_t button_read_pin(void) 
 {
-    return HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+    return rt_pin_read(BUTTON_PIN); 
 }
 
-
-int main()
+void btn_test_thread_entry(void *p)
 {
-    static uint8_t btn1_event_val;
-
-    button_init(&btn1, read_button1_GPIO, 0);
-    button_start(&btn1);
-
-    //make the timer invoking the button_ticks() interval 5ms.
-    //This function is implemented by yourself.
-    __timer_start(button_ticks, 0, 5);
-
+    uint32_t btn_event_val; 
+    
     while(1)
     {
-        if(btn1_event_val != get_button_event(&btn1)) {
-            btn1_event_val = get_button_event(&btn1);
+        if(btn_event_val != get_button_event(&btn)) 
+        {
+            btn_event_val = get_button_event(&btn);
 
-            if(btn1_event_val == PRESS_DOWN) {
-                //do something
-            } else if(btn1_event_val == PRESS_UP) {
-                //do something
-            } else if(btn1_event_val == LONG_PRESS_HOLD) {
-                //do something
+            switch(btn_event_val)
+            {
+            case PRESS_DOWN:
+                rt_kprintf("button press down\n"); 
+            break; 
+
+            case PRESS_UP: 
+                rt_kprintf("button press up\n");
+            break; 
+
+            case PRESS_REPEAT: 
+                rt_kprintf("button press repeat\n");
+            break; 
+
+            case SINGLE_CLICK: 
+                rt_kprintf("button single click\n");
+            break; 
+
+            case DOUBLE_CLICK: 
+                rt_kprintf("button double click\n");
+            break; 
+
+            case LONG_RRESS_START: 
+                rt_kprintf("button long press start\n");
+            break; 
+
+            case LONG_PRESS_HOLD: 
+                rt_kprintf("button long press hold\n");
+            break; 
             }
         }
+        
+        button_ticks(); 
+        rt_thread_delay(RT_TICK_PER_SECOND/200); 
     }
 }
 
+int multi_button_test(void)
+{
+    rt_thread_t thread = RT_NULL;
+
+    thread = rt_thread_create("btn_test", btn_test_thread_entry, RT_NULL, 1024, 15, 10);
+    if(thread == RT_NULL)
+    {
+        return RT_ERROR; 
+    }
+    rt_thread_startup(thread);
+
+    /* low level drive */
+    rt_pin_mode (BUTTON_PIN, PIN_MODE_INPUT); 
+    button_init (&btn, button_read_pin, PIN_LOW);
+    button_start(&btn);
+
+    return RT_EOK; 
+}
+INIT_APP_EXPORT(multi_button_test); 

@@ -13,6 +13,12 @@ inc = inc + [cwd]
 # add MultiButton basic code
 src = src + ['./multi_button.c']
 
+# add MultiButton Test code
+if GetDepend('MULTIBUTTON_USING_EXAMPLE_ASYNC'):
+    src = src + ['./examples/event_async.c']
+if GetDepend('MULTIBUTTON_USING_EXAMPLE_INQUIRE'):
+    src = src + ['./examples/event_inquire.c']
+
 # add group to IDE project
 group = DefineGroup('MultiButton', src, depend = ['PKG_USING_MULTIBUTTON'], CPPPATH = inc)
 
