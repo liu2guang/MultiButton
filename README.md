@@ -3,6 +3,8 @@
 ## 简介
 MultiButton 是一个小巧简单易用的事件驱动型按键驱动模块，可无限量扩展按键，按键事件的回调异步处理方式可以简化你的程序结构，去除冗余的按键处理硬编码，让你的按键业务逻辑更清晰。
 
+MultiButton的作者是0x1abin, github地址: https://github.com/0x1abin/MultiButton. 该仓库只是移植到RTT在线包中并修复了一个原库bug. 
+
 ## 使用方法
 1.先申请一个按键结构
 
