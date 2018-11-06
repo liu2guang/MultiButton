@@ -178,7 +178,10 @@ void button_handler(struct button* handle)
         if(handle->button_level == handle->active_level) 
         {
             handle->event = (uint8_t)LONG_PRESS_HOLD;
-            EVENT_CB(LONG_PRESS_HOLD);
+            if (handle->ticks % LONG_HOLD_CYC == 0)
+            {
+                EVENT_CB(LONG_PRESS_HOLD);
+            }
         } 
         else 
         {
