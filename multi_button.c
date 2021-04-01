@@ -1,25 +1,25 @@
 /*
  * @File:    multi_button.c
  * @Author:  Zibin Zheng
- * @Date:    2018-01-23 20:36:01 
- * 
+ * @Date:    2018-01-23 20:36:01
+ *
  * @LICENSE: Copyright (c) 2016 Zibin Zheng <znbin@qq.com>
- *           All rights reserved. 
- * 
+ *           All rights reserved.
+ *
  * @NOTE:    The original author of MultiButton is Zibin Zheng.
- *           Please contact the original author for authorization 
- *           before use.I(liu2guang) only adapt the library to 
- *           rt-thread and fix some bugs. I(liu2guang) am not 
+ *           Please contact the original author for authorization
+ *           before use.I(liu2guang) only adapt the library to
+ *           rt-thread and fix some bugs. I(liu2guang) am not
  *           responsible for the authorization of the library.
  *
- * Change Logs: 
- * Date           Author       Notes 
- * 2018-01-23     liu2guang    Adapter rtthread and Fix the bug. 
- */ 
-#include "multi_button.h" 
+ * Change Logs:
+ * Date           Author       Notes
+ * 2018-01-23     liu2guang    Adapter rtthread and Fix the bug.
+ */
+#include "multi_button.h"
 
 #define EVENT_CB(ev) if(handle->cb[ev]) handle->cb[ev]((button*)handle)
-    
+
 static struct button* head_handle = NULL;
 
 /**
@@ -70,41 +70,41 @@ void button_handler(struct button* handle)
     uint8_t read_gpio_level = handle->hal_button_Level();
 
     //ticks counter working..
-    if((handle->state) > 0) 
+    if((handle->state) > 0)
     {
         handle->ticks++;
     }
 
     /*------------button debounce handle---------------*/
     if(read_gpio_level != handle->button_level)
-    { 
+    {
         //not equal to prev one
         //continue read 3 times same new level change
-        if(++(handle->debounce_cnt) >= DEBOUNCE_TICKS) 
+        if(++(handle->debounce_cnt) >= DEBOUNCE_TICKS)
         {
             handle->button_level = read_gpio_level;
             handle->debounce_cnt = 0;
         }
-    } 
-    else 
-    { 
+    }
+    else
+    {
         // leved not change ,counter reset.
         handle->debounce_cnt = 0;
     }
 
     /*-----------------State machine-------------------*/
-    switch (handle->state) 
+    switch (handle->state)
     {
     case 0:
-        if(handle->button_level == handle->active_level) 
-        { 
+        if(handle->button_level == handle->active_level)
+        {
             handle->event = (uint8_t)PRESS_DOWN;
             EVENT_CB(PRESS_DOWN);
             handle->ticks  = 0;
             handle->repeat = 1;
-            handle->state  = 1; 
-        } 
-        else 
+            handle->state  = 1;
+        }
+        else
         {
             handle->event = (uint8_t)NONE_PRESS;
         }
@@ -112,62 +112,59 @@ void button_handler(struct button* handle)
 
     case 1:
         if(handle->button_level != handle->active_level)
-        { 
+        {
             handle->event = (uint8_t)PRESS_UP;
             EVENT_CB(PRESS_UP);
             handle->ticks = 0;
-            handle->state = 2; 
+            handle->state = 2;
 
-        } 
+        }
         else if(handle->ticks > LONG_TICKS)
         {
-            handle->event = (uint8_t)LONG_RRESS_START;
-            EVENT_CB(LONG_RRESS_START);
-            handle->state = 5; 
+            handle->event = (uint8_t)LONG_PRESS_START;
+            EVENT_CB(LONG_PRESS_START);
+            handle->state = 5;
         }
         break;
 
     case 2:
-        if(handle->button_level == handle->active_level) 
-        { 
+        if(handle->button_level == handle->active_level)
+        {
             handle->event = (uint8_t)PRESS_DOWN;
             EVENT_CB(PRESS_DOWN);
             handle->repeat++;
-            
-            handle->event = (uint8_t)PRESS_REPEAT;
             EVENT_CB(PRESS_REPEAT);
             handle->ticks = 0;
             handle->state = 3;
-            
-        } 
-        else if(handle->ticks > SHORT_TICKS) 
-        { 
-            if(handle->repeat == 1) 
+        }
+        else if(handle->ticks > SHORT_TICKS)
+        {
+            if(handle->repeat == 1)
             {
                 handle->event = (uint8_t)SINGLE_CLICK;
                 EVENT_CB(SINGLE_CLICK);
-            } 
-            else if(handle->repeat == 2) 
+            }
+            else if(handle->repeat == 2)
             {
                 handle->event = (uint8_t)DOUBLE_CLICK;
-                EVENT_CB(DOUBLE_CLICK); 
+                EVENT_CB(DOUBLE_CLICK);
             }
             handle->state = 0;
         }
         break;
 
     case 3:
-        if(handle->button_level != handle->active_level) 
+        if(handle->button_level != handle->active_level)
         {
             handle->event = (uint8_t)PRESS_UP;
             EVENT_CB(PRESS_UP);
-            
-            if(handle->ticks < SHORT_TICKS) 
+
+            if(handle->ticks < SHORT_TICKS)
             {
                 handle->ticks = 0;
-                handle->state = 2; 
-            } 
-            else 
+                handle->state = 2;
+            }
+            else
             {
                 handle->state = 0;
             }
@@ -175,20 +172,20 @@ void button_handler(struct button* handle)
         break;
 
     case 5:
-        if(handle->button_level == handle->active_level) 
+        if(handle->button_level == handle->active_level)
         {
             handle->event = (uint8_t)LONG_PRESS_HOLD;
             if (handle->ticks % LONG_HOLD_CYC == 0)
             {
                 EVENT_CB(LONG_PRESS_HOLD);
             }
-        } 
-        else 
+        }
+        else
         {
             handle->event = (uint8_t)PRESS_UP;
             EVENT_CB(PRESS_UP);
-            
-            handle->state = 0; 
+
+            handle->state = 0;
         }
         break;
     }
@@ -202,20 +199,20 @@ void button_handler(struct button* handle)
 int button_start(struct button* handle)
 {
     struct button* target = head_handle;
-    
-    while(target) 
+
+    while(target)
     {
-        if(target == handle) 
+        if(target == handle)
         {
             return -1;  //already exist.
         }
-        
+
         target = target->next;
     }
-    
+
     handle->next = head_handle;
     head_handle = handle;
-    
+
     return 0;
 }
 
@@ -227,15 +224,15 @@ int button_start(struct button* handle)
 void button_stop(struct button* handle)
 {
     struct button** curr;
-    
-    for(curr = &head_handle; *curr;) 
+
+    for(curr = &head_handle; *curr;)
     {
         struct button* entry = *curr;
-        
-        if (entry == handle) 
+
+        if (entry == handle)
         {
             *curr = entry->next;
-        } 
+        }
         else
         {
             curr = &entry->next;
@@ -251,7 +248,7 @@ void button_stop(struct button* handle)
 void button_ticks(void)
 {
     struct button* target;
-    
+
     for(target = head_handle; target != NULL; target = target->next)
     {
         button_handler(target);

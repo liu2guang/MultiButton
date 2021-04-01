@@ -19,7 +19,7 @@ typedef enum {
     PRESS_REPEAT,
     SINGLE_CLICK,
     DOUBLE_CLICK,
-    LONG_RRESS_START,
+    LONG_PRESS_START,
     LONG_PRESS_HOLD,
     number_of_event,
     NONE_PRESS
@@ -30,7 +30,7 @@ typedef struct button {
     uint8_t  repeat       : 4;
     uint8_t  event        : 4;
     uint8_t  state        : 3;
-    uint8_t  debounce_cnt : 3; 
+    uint8_t  debounce_cnt : 3;
     uint8_t  active_level : 1;
     uint8_t  button_level : 1;
     uint8_t  (*hal_button_Level)(void);
@@ -38,9 +38,9 @@ typedef struct button {
     struct button* next;
 }button;
 
-#ifdef __cplusplus  
-extern "C" {  
-#endif  
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void button_init(struct button* handle, uint8_t(*pin_level)(void), uint8_t active_level);
 void button_attach(struct button* handle, PressEvent event, BtnCallback cb);
@@ -50,7 +50,7 @@ void button_stop(struct button* handle);
 void button_ticks(void);
 
 #ifdef __cplusplus
-} 
+}
 #endif
 
 #endif
