@@ -3,34 +3,34 @@
 ## 简介
 MultiButton 是一个小巧简单易用的事件驱动型按键驱动模块，可无限量扩展按键，按键事件的回调异步处理方式可以简化你的程序结构，去除冗余的按键处理硬编码，让你的按键业务逻辑更清晰。
 
-MultiButton的作者是0x1abin, github地址: https://github.com/0x1abin/MultiButton. 该仓库只是移植到RTT在线包中并修复了一个原库bug. 
+MultiButton的作者是0x1abin, github地址: https://github.com/0x1abin/MultiButton. 
 
 ## 使用方法
 1.先申请一个按键结构
 
-```
+```c
 struct Button button1;
 ```
 2.初始化按键对象，绑定按键的GPIO电平读取接口**read_button_pin()** ，后一个参数设置有效触发电平
 
-```
+```c
 button_init(&button1, read_button_pin, 0);
 ```
 3.注册按键事件
 
-```
+```c
 button_attach(&button1, SINGLE_CLICK, Callback_SINGLE_CLICK_Handler);
 button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
 ...
 ```
 4.启动按键
 
-```
+```c
 button_start(&button1);
 ```
 5.设置一个5ms间隔的定时器循环调用后台处理函数
 
-```
+```c
 while(1) {
     ...
     if(timer_ticks == 5) {
@@ -45,7 +45,7 @@ while(1) {
 
 MultiButton 使用C语言实现，基于面向对象方式设计思路，每个按键对象单独用一份数据结构管理：
 
-```
+```c
 struct Button {
 	uint16_t ticks;
 	uint8_t  repeat: 4;
@@ -71,20 +71,29 @@ PRESS_UP | 按键弹起，每次松开都触发
 PRESS_REPEAT | 重复按下触发，变量repeat计数连击次数
 SINGLE_CLICK | 单击按键事件
 DOUBLE_CLICK | 双击按键事件
-LONG_RRESS_START | 达到长按时间阈值时触发一次
+LONG_PRESS_START | 达到长按时间阈值时触发一次
 LONG_PRESS_HOLD | 长按期间一直触发
 
 
 ## Examples
 
-```
+```c
 #include "button.h"
 
 struct Button btn1;
 
-int read_button1_GPIO() 
+uint8_t read_button1_GPIO() 
 {
 	return HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+}
+
+void BTN1_PRESS_DOWN_Handler(void* btn)
+{
+	//do something...
+}
+void BTN1_PRESS_UP_Handler(void* btn)
+{
+	//do something...
 }
 
 int main()
@@ -95,7 +104,7 @@ int main()
 	button_attach(&btn1, PRESS_REPEAT,     BTN1_PRESS_REPEAT_Handler);
 	button_attach(&btn1, SINGLE_CLICK,     BTN1_SINGLE_Click_Handler);
 	button_attach(&btn1, DOUBLE_CLICK,     BTN1_DOUBLE_Click_Handler);
-	button_attach(&btn1, LONG_RRESS_START, BTN1_LONG_RRESS_START_Handler);
+	button_attach(&btn1, LONG_PRESS_START, BTN1_LONG_PRESS_START_Handler);
 	button_attach(&btn2, LONG_PRESS_HOLD,  BTN1_LONG_PRESS_HOLD_Handler);
 	button_start(&btn1);
 	
@@ -107,16 +116,11 @@ int main()
 	{}
 }
 
-void BTN1_PRESS_DOWN_Handler(void* btn)
-{
-	//do something...
-}
-
-void BTN1_PRESS_UP_Handler(void* btn)
-{
-	//do something...
-}
-
 ...
 ```
 
+
+
+## 状态图
+
+![states.png](states.png)
