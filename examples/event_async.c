@@ -39,7 +39,7 @@ void button_callback(void *btn)
         rt_kprintf("button double click\n");
     break;
 
-    case LONG_RRESS_START:
+    case LONG_PRESS_START:
         rt_kprintf("button long press start\n");
     break;
 
@@ -79,7 +79,7 @@ int multi_button_test(void)
     button_attach(&btn, PRESS_REPEAT,     button_callback);
     button_attach(&btn, SINGLE_CLICK,     button_callback);
     button_attach(&btn, DOUBLE_CLICK,     button_callback);
-    button_attach(&btn, LONG_RRESS_START, button_callback);
+    button_attach(&btn, LONG_PRESS_START, button_callback);
     button_attach(&btn, LONG_PRESS_HOLD,  button_callback);
     button_start (&btn);
 
