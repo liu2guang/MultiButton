@@ -236,6 +236,7 @@ void button_stop(struct button* handle)
         if (entry == handle)
         {
             *curr = entry->next;
+            return;
         }
         else
         {
