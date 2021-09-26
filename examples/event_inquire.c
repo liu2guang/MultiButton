@@ -43,7 +43,7 @@ void btn_test_thread_entry(void *p)
                 rt_kprintf("button double click\n");
             break;
 
-            case LONG_RRESS_START:
+            case LONG_PRESS_START:
                 rt_kprintf("button long press start\n");
             break;
 
