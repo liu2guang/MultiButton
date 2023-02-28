@@ -169,9 +169,9 @@ static void button_handler(struct button* handle)
                 handle->state = 0;
             }
         }
-        else if(handle->ticks > SHORT_TICKS)
+        else if(handle->ticks > SHORT_TICKS) // SHORT_TICKS < press down hold time < LONG_TICKS
         {
-            handle->state = 0;
+            handle->state = 1;
         }
         break;
 
