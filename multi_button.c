@@ -65,7 +65,7 @@ PressEvent get_button_event(struct button* handle)
   * @param  handle: the button handle strcut.
   * @retval None
   */
-void button_handler(struct button* handle)
+static void button_handler(struct button* handle)
 {
     uint8_t read_gpio_level = handle->hal_button_Level();
 
