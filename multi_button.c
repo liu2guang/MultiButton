@@ -24,8 +24,8 @@ static struct button* head_handle = NULL;
 
 /**
   * @brief  Initializes the button struct handle.
-  * @param  handle: the button handle strcut.
-  * @param  pin_level: read the pin of the connet button level.
+  * @param  handle: the button handle struct.
+  * @param  pin_level: read the pin of the connected button level.
   * @param  active_level: pin pressed level.
   * @retval None
   */
@@ -40,7 +40,7 @@ void button_init(struct button* handle, uint8_t(*pin_level)(void), uint8_t activ
 
 /**
   * @brief  Attach the button event callback function.
-  * @param  handle: the button handle strcut.
+  * @param  handle: the button handle struct.
   * @param  event: trigger event type.
   * @param  cb: callback function.
   * @retval None
@@ -52,7 +52,7 @@ void button_attach(struct button* handle, PressEvent event, BtnCallback cb)
 
 /**
   * @brief  Inquire the button event happen.
-  * @param  handle: the button handle strcut.
+  * @param  handle: the button handle struct.
   * @retval button event.
   */
 PressEvent get_button_event(struct button* handle)
@@ -62,7 +62,7 @@ PressEvent get_button_event(struct button* handle)
 
 /**
   * @brief  button driver core function, driver state machine.
-  * @param  handle: the button handle strcut.
+  * @param  handle: the button handle struct.
   * @retval None
   */
 static void button_handler(struct button* handle)
@@ -88,7 +88,7 @@ static void button_handler(struct button* handle)
     }
     else
     {
-        // leved not change ,counter reset.
+        // level not change ,counter reset.
         handle->debounce_cnt = 0;
     }
 
@@ -201,7 +201,7 @@ static void button_handler(struct button* handle)
 
 /**
   * @brief  Start the button work, add the handle into work list.
-  * @param  handle: target handle strcut.
+  * @param  handle: target handle struct.
   * @retval 0: succeed. -1: already exist.
   */
 int button_start(struct button* handle)
@@ -226,7 +226,7 @@ int button_start(struct button* handle)
 
 /**
   * @brief  Stop the button work, remove the handle off work list.
-  * @param  handle: target handle strcut.
+  * @param  handle: target handle struct.
   * @retval None
   */
 void button_stop(struct button* handle)
