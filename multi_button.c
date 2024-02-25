@@ -18,7 +18,7 @@
  */
 #include "multi_button.h"
 
-#define EVENT_CB(ev) if(handle->cb[ev]) handle->cb[ev]((button*)handle)
+#define EVENT_CB(ev) if(handle->cb[ev]) handle->cb[ev]((void*)handle)
 
 static struct button* head_handle = NULL;
 
