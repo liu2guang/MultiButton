@@ -117,7 +117,6 @@ static void button_handler(struct button* handle)
             EVENT_CB(PRESS_UP);
             handle->ticks = 0;
             handle->state = 2;
-
         }
         else if(handle->ticks > LONG_TICKS)
         {
